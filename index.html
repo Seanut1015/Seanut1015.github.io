@@ -1,47 +1,64 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BlinkAI RAG Client</title>
-  <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; }
-    textarea { width: 100%; height: 120px; }
-    pre { background: #f0f0f0; padding: 12px; white-space: pre-wrap; }
-    button { margin-top: 10px; padding: 10px 20px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Tic-Tac-Toe - Lobby</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>2025/11/21</h1>
-  
-  <h1>BlinkAI RAG Web Client</h1>
+    <div id="lobby-container">
+        <div id="login-screen">
+            <h1>3D Tic-Tac-Toe</h1>
+            <input type="text" id="username-input" placeholder="Enter Player ID" maxlength="10">
+            <button id="login-btn">Enter Lobby</button>
+            <p id="login-error" class="error"></p>
+        </div>
 
-  <textarea id="input" placeholder="輸入問題..."></textarea>
-  <button id="send">送出</button>
+        <div id="room-selection-screen" class="hidden">
+            <div class="lobby-header">
+                <h2>Lobby <span id="player-display"></span></h2>
+                <button id="create-room-btn">Create Room</button>
+            </div>
+            <div id="room-list">
+                <p>No rooms available. Create one!</p>
+            </div>
+        </div>
+    </div>
 
-  <h2>結果</h2>
-  <pre id="output"></pre>
+    <div id="waiting-room-overlay" class="hidden">
+        <div class="modal">
+            <h2 id="room-id-display">Room: ???</h2>
+            <p id="waiting-status">Waiting for players...</p>
+            <div id="player-list"></div>
+            <button id="start-game-btn" class="hidden" disabled>Start Game</button>
+            <button id="leave-room-btn" class="secondary-btn">Leave Room</button>
+        </div>
+    </div>
 
-  <script>
-    const API_BASE = "https://test-ai-i6qc.onrender.com";
+    <div id="game-view" class="hidden">
+        <div id="setup-modal-backdrop" class="hidden"> <div id="setup-modal">
+                <h2 id="setup-title">Choose Color</h2>
+                <div id="color-picker">
+                    <button class="color-btn" data-color="e74c3c"></button>
+                    <button class="color-btn" data-color="f1c40f"></button>
+                    <button class="color-btn" data-color="2ecc71"></button>
+                    <button class="color-btn" data-color="3498db"></button>
+                </div>
+                <p id="game-message"></p>
+            </div>
+        </div>
 
-    document.getElementById("send").onclick = async () => {
-      const text = document.getElementById("input").value;
-      document.getElementById("output").innerText = "⏳ 處理中...";
+        <div id="info"></div>
+        <button id="reset-button">
+            Reset Game 
+            <span id="vote-count" class="hidden">(0/2)</span> 
+        </button>
+        </div>
 
-      try {
-        const res = await fetch(`${API_BASE}/api/query`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: text })
-        });
-
-        const data = await res.json();
-        document.getElementById("output").innerText = data.answer || JSON.stringify(data, null, 2);
-      } catch (err) {
-        document.getElementById("output").innerText = "❌ 錯誤：\n" + err;
-      }
-    };
-  </script>
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+    </script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>

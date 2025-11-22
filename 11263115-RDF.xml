@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<Classroom rdf:ID="BGC0305"
-    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-    xmlns="http://www.example.org/ontology#">
-    <hasStudent>Sean</hasStudent>
-    <hasComputer>Computer</hasComputer>
-    <hasScreen>Screen</hasScreen>
-</Classroom>
