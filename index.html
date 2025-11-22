@@ -9,36 +9,36 @@
 <body>
     <div id="lobby-container">
         <div id="login-screen">
-            <h1>3D Tic-Tac-Toe</h1>
+            <h1>3DOXG</h1>
             <input type="text" id="username-input" placeholder="Enter Player ID" maxlength="10">
-            <button id="login-btn">Enter Lobby</button>
+            <button id="login-btn">進入大廳</button>
             <p id="login-error" class="error"></p>
         </div>
 
         <div id="room-selection-screen" class="hidden">
             <div class="lobby-header">
-                <h2>Lobby <span id="player-display"></span></h2>
-                <button id="create-room-btn">Create Room</button>
+                <h2>大廳 <span id="player-display"></span></h2>
+                <button id="create-room-btn">創建房間</button>
             </div>
             <div id="room-list">
-                <p>No rooms available. Create one!</p>
+                <p>目前沒有房間。創建一個吧！</p>
             </div>
         </div>
     </div>
 
     <div id="waiting-room-overlay" class="hidden">
         <div class="modal">
-            <h2 id="room-id-display">Room: ???</h2>
-            <p id="waiting-status">Waiting for players...</p>
+            <h2 id="room-id-display">房間: ???</h2>
+            <p id="waiting-status">等待玩家加入...</p>
             <div id="player-list"></div>
-            <button id="start-game-btn" class="hidden" disabled>Start Game</button>
-            <button id="leave-room-btn" class="secondary-btn">Leave Room</button>
+            <button id="start-game-btn" class="hidden" disabled>開始遊戲</button>
+            <button id="leave-room-btn" class="secondary-btn">離開房間</button>
         </div>
     </div>
 
     <div id="game-view" class="hidden">
         <div id="setup-modal-backdrop" class="hidden"> <div id="setup-modal">
-                <h2 id="setup-title">Choose Color</h2>
+                <h2 id="setup-title">選擇顏色</h2>
                 <div id="color-picker">
                     <button class="color-btn" data-color="e74c3c"></button>
                     <button class="color-btn" data-color="f1c40f"></button>
@@ -51,7 +51,7 @@
 
         <div id="info"></div>
         <button id="reset-button">
-            Reset Game 
+            重置遊戲 
             <span id="vote-count" class="hidden">(0/2)</span> 
         </button>
         </div>
