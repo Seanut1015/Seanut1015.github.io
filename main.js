@@ -9,6 +9,7 @@ class AudioManager {
         this.bgmVolumeSlider = document.getElementById('bgm-volume');
         this.seVolumeSlider = document.getElementById('se-volume');
         this.bgmAudio = document.getElementById('bgm-audio');
+        this.winSoundPlayed = false;
 
         // 將遊戲事件名稱映射到 audio 元素
         this.seMap = {
@@ -386,6 +387,10 @@ function updateGameUI(state) {
         setupModalBackdrop.classList.add('hidden');
     }
 
+    if (state.game_started && !state.winner) {
+        audioManager.winSoundPlayed = false;
+    }
+
     // 顯示回合資訊
     if (state.winner) {
         infoElement.innerText = state.winner === 'Tie' ? "It's a Tie!" : `Player ${state.winner} Wins!`;
@@ -400,6 +405,7 @@ function updateGameUI(state) {
             } else {
                 audioManager.playSE('lose');
             }
+            audioManager.winSoundPlayed = true;
         }
     } else if (state.game_started) {
         infoElement.innerText = state.turn === myPlayerNumber ? "Your Turn" : `Player ${state.turn}'s Turn`;
