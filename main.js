@@ -477,6 +477,7 @@ function onPointerClick(event) {
         if (obj.userData.type === 'placeholder') {
             const { x, y, z } = obj.userData;
             ws.send(JSON.stringify({ type: 'MOVE', move: { x, y, z } }));
+            audioManager.playSE('place_mark');
             if (outlineSprite) { group.remove(outlineSprite); outlineSprite = null; }
         }
     }
