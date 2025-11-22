@@ -118,6 +118,7 @@ const roomScreen = document.getElementById('room-selection-screen');
 const lobbyContainer = document.getElementById('lobby-container');
 const waitingOverlay = document.getElementById('waiting-room-overlay');
 const gameView = document.getElementById('game-view');
+const licenseInfo = document.getElementById('license-info');
 
 const usernameInput = document.getElementById('username-input');
 const loginBtn = document.getElementById('login-btn');
@@ -202,6 +203,7 @@ leaveRoomBtn.addEventListener('click', () => {
     waitingOverlay.classList.add('hidden');
     gameView.classList.add('hidden');
     lobbyContainer.classList.remove('hidden');
+    licenseInfo.classList.add('hidden');
     
     // 隱藏 canvas
     if (renderer) renderer.domElement.style.display = 'none';
@@ -265,6 +267,7 @@ function updateGameState(state) {
         // --- 等待室階段 ---
         waitingOverlay.classList.remove('hidden');
         gameView.classList.add('hidden');
+        licenseInfo.classList.add('hidden');
         if (renderer) renderer.domElement.style.display = 'none';
 
         roomIdDisplay.innerText = `Room: ${state.room_id}`;
@@ -285,6 +288,7 @@ function updateGameState(state) {
         // --- 遊戲進行階段 ---
         waitingOverlay.classList.add('hidden');
         gameView.classList.remove('hidden');
+        licenseInfo.classList.remove('hidden');
         
         // 初始化 Three.js (如果還沒)
         if (!isThreeJsInitialized) {
