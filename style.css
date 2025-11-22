@@ -244,3 +244,51 @@ button:disabled {
 .color-btn[data-color="f1c40f"] { background-color: #f1c40f; }
 .color-btn[data-color="2ecc71"] { background-color: #2ecc71; }
 .color-btn[data-color="3498db"] { background-color: #3498db; }
+/* --- Audio Control Styles (請加入到您的 style.css 中) --- */
+#audio-controls {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 300; /* 確保在所有 UI 元素之上 */
+    background: rgba(44, 44, 44, 0.8);
+    backdrop-filter: blur(4px);
+    padding: 10px 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.volume-slider-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#audio-controls label {
+    font-size: 14px;
+    min-width: 50px;
+}
+
+/* 簡化的拉條樣式，確保在各種瀏覽器中可用 */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 120px;
+    height: 4px;
+    background: #555;
+    border-radius: 5px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #3498db;
+    border-radius: 50%;
+    cursor: pointer;
+}

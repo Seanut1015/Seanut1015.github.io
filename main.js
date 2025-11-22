@@ -1,6 +1,116 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+// ... (Your imports at the top) ...
+
+// --- AUDIO MANAGER CLASS ---
+class AudioManager {
+    constructor() {
+        this.bgmVolumeSlider = document.getElementById('bgm-volume');
+        this.seVolumeSlider = document.getElementById('se-volume');
+        this.bgmAudio = document.getElementById('bgm-audio');
+
+        // 將遊戲事件名稱映射到 audio 元素
+        this.seMap = {
+            'place_mark': document.getElementById('se-place-mark'),
+            'win': document.getElementById('se-win'),
+            'lose': document.getElementById('se-lose'),
+            'menu_click': document.getElementById('se-menu-click')
+        };
+        
+        // **!!! 請確保您的音檔路徑正確 !!!**
+        this.bgmAudio.src = '/audio/bgm.mp3'; 
+        this.seMap['place_mark'].src = '/audio/se_place_mark.wav';
+        this.seMap['win'].src = '/audio/se_win.wav';
+        this.seMap['lose'].src = '/audio/se_lose.wav';
+        this.seMap['menu_click'].src = '/audio/se_menu_click.wav';
+
+
+        this.loadSettings();
+        this.addEventListeners();
+    }
+
+    loadSettings() {
+        // 從 LocalStorage 載入音量設定 (記憶音量)
+        let bgmVolume = localStorage.getItem('bgmVolume');
+        let seVolume = localStorage.getItem('seVolume');
+
+        if (bgmVolume !== null) {
+            this.bgmVolumeSlider.value = bgmVolume;
+        }
+        if (seVolume !== null) {
+            this.seVolumeSlider.value = seVolume;
+        }
+
+        // 初始化所有音訊元素的音量
+        this.updateBGMVolume(this.bgmVolumeSlider.value);
+        this.updateSEVolume(this.seVolumeSlider.value);
+    }
+
+    saveSettings() {
+        localStorage.setItem('bgmVolume', this.bgmVolumeSlider.value);
+        localStorage.setItem('seVolume', this.seVolumeSlider.value);
+    }
+
+    addEventListeners() {
+        // BGM 音量調整
+        this.bgmVolumeSlider.addEventListener('input', (e) => {
+            this.updateBGMVolume(e.target.value);
+            this.saveSettings();
+        });
+
+        // SE 音量調整
+        this.seVolumeSlider.addEventListener('input', (e) => {
+            this.updateSEVolume(e.target.value);
+            this.saveSettings();
+        });
+        
+        // --- 選單點擊音效 (應用在所有大廳和選色按鈕上) ---
+        document.querySelectorAll('button:not(.color-btn)').forEach(btn => {
+            btn.addEventListener('click', () => this.playSE('menu_click'));
+        });
+    }
+
+    updateBGMVolume(volume) {
+        this.bgmAudio.volume = parseFloat(volume);
+    }
+
+    updateSEVolume(volume) {
+        const floatVolume = parseFloat(volume);
+        for (const key in this.seMap) {
+            this.seMap[key].volume = floatVolume;
+        }
+    }
+
+    startBGM() {
+        if (this.bgmAudio.paused) {
+            // 處理瀏覽器自動播放限制 (可能需要用戶點擊頁面後才能播放)
+            this.bgmAudio.play().catch(error => {
+                console.warn("BGM autoplay failed, waiting for user interaction:", error);
+            });
+        }
+    }
+
+    stopBGM() {
+        this.bgmAudio.pause();
+    }
+
+    playSE(event) {
+        const audio = this.seMap[event];
+        if (audio) {
+            // 重置播放，確保音效可以疊加播放 (例如快速點擊)
+            audio.currentTime = 0;
+            audio.play().catch(error => {
+                console.warn(`Failed to play ${event} SE:`, error);
+            });
+        }
+    }
+}
+
+const audioManager = new AudioManager(); 
+// --- AUDIO MANAGER 結束 ---
+
+// ... (Your existing global variables and DOM elements) ...
 // --- DOM Elements ---
 const loginScreen = document.getElementById('login-screen');
 const roomScreen = document.getElementById('room-selection-screen');
@@ -169,6 +279,7 @@ function updateGameState(state) {
             startGameBtn.classList.add('hidden');
         }
 
+        audioManager.stopBGM();
     } else {
         // --- 遊戲進行階段 ---
         waitingOverlay.classList.add('hidden');
@@ -178,11 +289,13 @@ function updateGameState(state) {
         if (!isThreeJsInitialized) {
             initThreeJS();
             isThreeJsInitialized = true;
+            audioManager.startBGM(); // Three.js 初始化後播放 BGM
         }
         renderer.domElement.style.display = 'block'; // 顯示 canvas
 
         updateGameUI(state);
         updateBoard(state);
+        
     }
 }
 
@@ -276,6 +389,18 @@ function updateGameUI(state) {
     // 顯示回合資訊
     if (state.winner) {
         infoElement.innerText = state.winner === 'Tie' ? "It's a Tie!" : `Player ${state.winner} Wins!`;
+        if (state.winner !== 'Tie') {
+            // 判斷當前玩家是贏家還是輸家
+            // 注意：state.winner 是 '1' 或 '2' 的字串
+            const winPlayerNum = state.winner === '1' ? 1 : 2; 
+
+            // 檢查是否是當前瀏覽器的玩家贏了
+            if (winPlayerNum === myPlayerNumber) {
+                audioManager.playSE('win');
+            } else {
+                audioManager.playSE('lose');
+            }
+        }
     } else if (state.game_started) {
         infoElement.innerText = state.turn === myPlayerNumber ? "Your Turn" : `Player ${state.turn}'s Turn`;
     }
