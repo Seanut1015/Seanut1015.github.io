@@ -292,3 +292,17 @@ input[type="range"]::-webkit-slider-thumb {
     border-radius: 50%;
     cursor: pointer;
 }
+/* --- 版權資訊樣式 (加入到 style.css) --- */
+#license-info {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    z-index: 300; /* 確保在 canvas 頂部 */
+    color: rgba(255, 255, 255, 0.5); /* 半透明文字 */
+    font-size: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px;
+    border-radius: 5px;
+    pointer-events: none; /* 讓滑鼠點擊可以穿透 */
+    line-height: 1.5;
+}

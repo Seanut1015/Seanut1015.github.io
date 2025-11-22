@@ -317,6 +317,13 @@ function initThreeJS() {
     document.body.appendChild(renderer.domElement); // Canvas 是全螢幕的，我們用 CSS z-index 控制層級
 
     controls = new OrbitControls(camera, renderer.domElement);
+    controls.mouseButtons = {
+        MIDDLE: THREE.MOUSE.DOLLY, // 中鍵用於縮放 (保持不變)
+        RIGHT: THREE.MOUSE.ROTATE // 右鍵用於旋轉 (預設為平移)
+    };
+    renderer.domElement.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+    }, false);
     raycaster = new THREE.Raycaster();
 
     // 初始化棋盤 (placeholder)
