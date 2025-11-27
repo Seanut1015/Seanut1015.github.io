@@ -112,10 +112,6 @@ const audioManager = new AudioManager();
 // --- AUDIO MANAGER 結束 ---
 
 // ... (Your existing global variables and DOM elements) ...
-// --- 新增 DOM 變數 ---
-const surrenderButton = document.getElementById('surrender-button');
-const leaveGameButton = document.getElementById('leave-game-button');
-const myPlayerNumberText = document.getElementById('my-player-number-text');
 // --- DOM Elements ---
 const loginScreen = document.getElementById('login-screen');
 const roomScreen = document.getElementById('room-selection-screen');
@@ -263,10 +259,6 @@ window.joinRoom = (roomId) => {
 function updateGameState(state) {
     currentGameState = state;
     if (state.your_player_number) myPlayerNumber = state.your_player_number;
-
-    if (myPlayerNumberText && myPlayerNumber) {
-        myPlayerNumberText.innerText = myPlayerNumber;
-    }
     // 1. 控制視圖顯示
     lobbyContainer.classList.add('hidden');
     
@@ -275,9 +267,7 @@ function updateGameState(state) {
         waitingOverlay.classList.remove('hidden');
         gameView.classList.add('hidden');
         licenseInfo.classList.add('hidden');
-        if (surrenderButton) {
-            surrenderButton.parentElement.parentElement.classList.add('hidden');
-        }
+        
         if (renderer) renderer.domElement.style.display = 'none';
 
         roomIdDisplay.innerText = `房號: ${state.room_id}`;
@@ -300,13 +290,6 @@ function updateGameState(state) {
         gameView.classList.remove('hidden');
         licenseInfo.classList.remove('hidden');
 
-        if (surrenderButton) {
-            surrenderButton.parentElement.parentElement.classList.remove('hidden');
-            // --- 修正點 2：控制投降按鈕狀態 ---
-            // 遊戲未結束時啟用，結束時禁用
-            surrenderButton.disabled = !!state.winner;
-            leaveGameButton.disabled = !!state.winner; // 遊戲結束時也鎖定離開
-        }
         
         // 初始化 Three.js (如果還沒)
         if (!isThreeJsInitialized) {
@@ -548,24 +531,5 @@ resetButton.addEventListener('click', () => {
     if (!resetButton.disabled) {
         ws.send(JSON.stringify({ type: 'RESET' }));
         resetButton.disabled = true;
-    }
-});
-// 位於 main.js 的事件監聽器區塊
-// ... (其他事件監聽器) ...
-
-// --- 新增：投降按鈕與離開遊戲按鈕事件 ---
-surrenderButton.addEventListener('click', () => {
-    if (currentGameState.game_started && !currentGameState.winner && confirm("確定要投降嗎？投降將會輸掉本局遊戲。")) {
-        audioManager.playSE('menu_click'); 
-        ws.send(JSON.stringify({ type: 'SURRENDER' })); // 發送投降指令給伺服器
-        surrenderButton.disabled = true; // 避免重複發送
-    }
-});
-
-leaveGameButton.addEventListener('click', () => {
-    // 遊戲中的離開，與等待室的離開功能相同
-    if (confirm("確定要離開房間嗎？")) {
-        audioManager.playSE('menu_click');
-        ws.send(JSON.stringify({ type: 'LEAVE_ROOM' }));
     }
 });
