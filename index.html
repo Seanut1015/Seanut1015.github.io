@@ -48,8 +48,21 @@
                 <p id="game-message"></p>
             </div>
         </div>
-
         <div id="info"></div>
+        <div id="game-controls-panel">
+            <div id="instructions">
+                <h3>玩法說明</h3>
+                <ul>
+                    <li>左鍵點擊: **下棋** (放置標記)</li>
+                    <li>右鍵拖曳: **旋轉** 視角</li>
+                    <li>滾輪滑動: **縮放** 視角</li>
+                </ul>
+            </div>
+            <div id="game-action-buttons">
+                <button id="surrender-button" class="action-btn">投降</button>
+                <button id="leave-game-button" class="action-btn secondary-btn">離開房間</button>
+            </div>
+        </div>
         <button id="reset-button">
             重置遊戲 
             <span id="vote-count" class="hidden">(0/2)</span> 

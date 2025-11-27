@@ -306,3 +306,65 @@ input[type="range"]::-webkit-slider-thumb {
     pointer-events: none; /* 讓滑鼠點擊可以穿透 */
     line-height: 1.5;
 }
+/* --- Game View UI Layout --- */
+#game-controls-panel {
+    position: absolute;
+    top: 100px; /* 位於 #info 和 #reset-button 下方 */
+    right: 20px;
+    z-index: 100;
+    width: 200px;
+    padding: 15px;
+    background: rgba(44, 44, 44, 0.7);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+#instructions h3 {
+    margin-top: 0;
+    color: #3498db;
+    border-bottom: 1px solid #555;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+#instructions ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+#instructions li {
+    margin-bottom: 5px;
+    color: #e0e0e0;
+}
+
+#game-action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 投降按鈕使用紅色警示 */
+#surrender-button { 
+    background: linear-gradient(135deg, #e74c3c, #c0392b); /* 紅色漸變 */
+}
+
+/* 離開按鈕使用次要/低調風格 */
+#leave-game-button {
+    background: #3a3a3a; /* 深灰色 */
+}
+
+/* 玩家編號顯示 (底部) */
+#player-id-display {
+    position: fixed;
+    left: 20px;
+    bottom: 110px; /* 位於 License 資訊上方 */
+    z-index: 300;
+    font-size: 16px;
+    font-weight: bold;
+    color: #f1c40f; /* 黃色強調 */
+    background: rgba(44, 44, 44, 0.7);
+    padding: 5px 10px;
+    border-radius: 5px;
+}   
