@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>驚訝樂觀的混沌卷軸計算機</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #1e1e1e;
+            --card-bg: #2d2d2d;
+            --text-main: #e0e0e0;
+            --text-dim: #b0b0b0;
+            --border-color: #444;
+            --accent-red: #ff4d4d;
+            --accent-green: #4ade80;
+            --input-bg: #3d3d3d;
+        }
+
+        body {
+            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            width: 95%;
+            max-width: 1200px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            overflow: hidden;
+            flex-wrap: wrap;
+            border: 1px solid var(--border-color);
+        }
+
+        .sidebar {
+            width: 320px;
+            padding: 25px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        h2 { font-size: 1.2rem; margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; margin-bottom: 5px; color: var(--text-dim); }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: white;
+            box-sizing: border-box;
+            outline: none;
+        }
+        input:focus { border-color: var(--accent-red); }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #bb433f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover { background-color: #d9534f; }
+
+        .main-content {
+            flex: 1;
+            padding: 25px;
+            min-width: 400px;
+            background-color: #252525;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #result-report {
+            margin-top: 20px;
+            padding: 15px;
+            background: #353535;
+            border-radius: 8px;
+            line-height: 1.7;
+            font-size: 14px;
+            border-left: 4px solid var(--accent-red);
+        }
+
+        .status-tag {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        .bg-red { background-color: rgba(255, 77, 77, 0.2); color: var(--accent-red); }
+        .bg-green { background-color: rgba(74, 222, 128, 0.2); color: var(--accent-green); }
+        .highlight-val { color: #fff; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="sidebar">
+        <h2>參數設定</h2>
+        <div class="form-group"><label>強化捲數:</label><input type="number" id="times" value="8"></div>
+        <div class="form-group"><label>屬攻比 (1攻=?屬):</label><input type="number" id="multiplier" value="3"></div>
+        <div class="form-group"><label>目前主屬:</label><input type="number" id="valA" value="16"></div>
+        <div class="form-group"><label>目前攻擊力:</label><input type="number" id="valB" value="16"></div>
+        <button onclick="calculate()">開始分析</button>
+
+        <div id="result-report">
+            <strong>分析報告：</strong><br>
+            <span style="color: var(--text-dim);">等待計算中...</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div style="flex: 1; position: relative;">
+            <canvas id="distChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    const baseProbs = { 0: 18.38, 1: 33.01, 2: 23.87, 3: 13.87, 4: 4.94, 5: 0.00, 6: 5.93 };
+    let chartInstance = null;
+
+    function calculate() {
+        const times = parseInt(document.getElementById('times').value);
+        const multY = parseInt(document.getElementById('multiplier').value);
+        const valA = parseInt(document.getElementById('valA').value);
+        const valB = parseInt(document.getElementById('valB').value);
+        const currentTotal = valA + (valB * multY);
+
+        // 1. 理論期望值計算 (a.html 邏輯)
+        const theoryExpected = (times * 1.77 * (1 + multY)).toFixed(2);
+
+        // 2. DP 計算分佈
+        let singleDist = { 0: 1.0 };
+        for (let t = 0; t < times; t++) {
+            let newDp = {};
+            for (let score in singleDist) {
+                for (let addVal in baseProbs) {
+                    if (baseProbs[addVal] === 0) continue;
+                    let nextScore = parseInt(score) + parseInt(addVal);
+                    newDp[nextScore] = (newDp[nextScore] || 0) + (singleDist[score] * baseProbs[addVal] / 100);
+                }
+            }
+            singleDist = newDp;
+        }
+
+        // 3. 加權組合
+        let weightedDist = {};
+        const scores = Object.keys(singleDist);
+        for (let sA of scores) {
+            for (let sB of scores) {
+                let total = parseInt(sA) + (parseInt(sB) * multY);
+                weightedDist[total] = (weightedDist[total] || 0) + (singleDist[sA] * singleDist[sB]);
+            }
+        }
+
+        const sortedLabels = Object.keys(weightedDist).map(Number).sort((a, b) => a - b);
+        const sortedProbs = sortedLabels.map(s => weightedDist[s]);
+
+        // 4. 統計計算 (b.html 邏輯：嚴格大於才算超越)
+        let probBeat = 0;   // 輸給或等於目前的累積機率
+        let probExceed = 0; // 嚴格大於目前的機率
+        let probGe = 0;     // 大於等於目前的機率 (前 X%)
+
+        sortedLabels.forEach(s => {
+            if (s < currentTotal) probBeat += weightedDist[s];
+            if (s > currentTotal) probExceed += weightedDist[s];
+            if (s >= currentTotal) probGe += weightedDist[s];
+        });
+
+        // 5. 判斷配色與狀態
+        const isAboveAverage = currentTotal >= theoryExpected;
+        const mainColor = isAboveAverage ? '#4ade80' : '#ff4d4d';
+        const statusText = isAboveAverage ? "高於期望值" : "低於期望值";
+        const statusClass = isAboveAverage ? "bg-green" : "bg-red";
+        
+        // 期望次數計算 (幾何分佈)
+        const expectedTries = probExceed > 0 ? Math.ceil(1 / probExceed) : "無法超越";
+        
+        function formatProb(p) {
+            let percent = p * 100;
+            if (percent === 0) return "0";
+            if (percent >= 0.1) return percent.toFixed(1); // 正常顯示到小數第一位
+            
+            // 如果小於 0.1，則使用有效數字邏輯找到第一個非零位
+            // toPrecision(1) 會自動保留到第一個非零數字
+            return parseFloat(percent.toPrecision(1)).toString();
+        }
+        const displayProbGe = formatProb(probGe);
+        const displayProbExceed = formatProb(probExceed);
+        // 更新 UI
+        document.getElementById('result-report').style.borderColor = mainColor;
+        document.getElementById('result-report').innerHTML = `
+            <b>目前效益：<span class="highlight-val">${currentTotal}</span></b> 
+            <span class="status-tag ${statusClass}">${statusText}</span><br>
+            理論平均值：<span class="highlight-val">${theoryExpected}</span><br><br>
+            <b>強度評估：</b><br>
+            位於前：<span style="color:${mainColor}; font-weight:bold;">${displayProbGe}%</span><br><br>
+            <b>洗白建議：</b><br>
+            超越目前的機率：${displayProbExceed}%<br>
+            期望需洗：<span style="color:${mainColor}; font-weight:bold;">${expectedTries} 次</span>才會超越目前結果
+        `;
+
+        // 6. 繪製圖表 (a.html 配色 + b.html 座標)
+        const ctx = document.getElementById('distChart').getContext('2d');
+        if (chartInstance) chartInstance.destroy();
+
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: sortedLabels,
+                datasets: [{
+                    data: sortedProbs.map(p => p * 100),
+                    backgroundColor: sortedLabels.map(s => s === currentTotal ? mainColor : 'rgba(68, 68, 68, 0.5)'),
+                    borderColor: sortedLabels.map(s => s === currentTotal ? '#ffffff' : 'transparent'),
+                    borderWidth: 1,
+                    barPercentage: 1,
+                    categoryPercentage: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { 
+                        ticks: { color: '#b0b0b0' },
+                        grid: { color: '#333' },
+                        title: { display: true, text: '效能總分', color: '#888' }
+                    },
+                    y: { 
+                        ticks: { color: '#b0b0b0' },
+                        grid: { color: '#333' },
+                        title: { display: true, text: '出現機率 (%)', color: '#888' },
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#333',
+                        callbacks: { label: (c) => `分數 ${c.label}: ${c.raw.toFixed(4)}%` }
+                    }
+                }
+            }
+        });
+    }
+
+    window.onload = calculate;
+</script>
+</body>
+</html>
